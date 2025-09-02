@@ -2,8 +2,11 @@
   "name": "trivia-duel",
   "private": true,
   "version": "0.0.1",
-  "workspaces": ["apps/*", "packages/*"],
-  "packageManager": "pnpm@9",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "packageManager": "pnpm@9.0.0",
   "scripts": {
     "format": "biome format . --write",
     "lint": "biome check .",
@@ -11,5 +14,11 @@
     "build": "turbo run build",
     "test": "turbo run test"
   },
-  "engines": { "node": "^20" }
+  "engines": {
+    "node": "^20"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.2",
+    "turbo": "^2.5.6"
+  }
 }

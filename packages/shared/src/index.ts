@@ -1,2 +1,2 @@
-export type Lang = 'en' | 'ar';
-export interface SocketEvents {}
+export type Lang = 'en' | 'ar'
+export type SocketEvents = Record<string, never>
