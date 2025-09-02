@@ -1,0 +1,15 @@
+{
+  "name": "trivia-duel",
+  "private": true,
+  "version": "0.0.1",
+  "workspaces": ["apps/*", "packages/*"],
+  "packageManager": "pnpm@9",
+  "scripts": {
+    "format": "biome format . --write",
+    "lint": "biome check .",
+    "check": "biome check --diagnostic-level=error .",
+    "build": "turbo run build",
+    "test": "turbo run test"
+  },
+  "engines": { "node": "^20" }
+}
