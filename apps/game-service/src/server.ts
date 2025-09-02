@@ -4,9 +4,13 @@ import rateLimit from '@fastify/rate-limit'
 import Fastify from 'fastify'
 import type { Socket } from 'socket.io'
 import { Server as IOServer } from 'socket.io'
+import { loadEnv } from './config'
+import { DuelRoom } from './duel/room'
+import { MatchmakingQueue } from './matchmaking/queue'
 
-const PORT = Number(process.env.PORT || 3001)
-const HOST = process.env.HOST || '0.0.0.0'
+const env = loadEnv()
+const PORT = env.PORT
+const HOST = env.HOST
 
 const fastify = Fastify({ logger: true })
 
@@ -24,29 +28,31 @@ const io = new IOServer(fastify.server, {
 type FindPayload = { lang: 'en' | 'ar'; topic?: string }
 type AnswerPayload = { round: number; selectedIdx: number }
 
+const queue = new MatchmakingQueue()
+
 io.on('connection', (socket: Socket) => {
   fastify.log.info({ id: socket.id }, 'socket connected')
 
   socket.on('duel:find', (payload: FindPayload) => {
-    fastify.log.info({ id: socket.id, payload }, 'duel:find')
-    // TODO: enqueue matchmaking by lang/topic
-    socket.emit('duel:ready')
-    // For now, immediately start round 1 placeholder
-    socket.emit('round:start', {
-      round: 1,
-      totalRounds: 10,
-      question: {
-        id: 'placeholder-q1',
-        lang: payload?.lang ?? 'en',
-        stem: 'Placeholder question: 2 + 2 = ?',
-        options: ['3', '4', '5', '22'],
-      },
-      endsAt: Date.now() + 15000,
-    })
+    const lang = payload?.lang ?? 'en'
+    const topic = payload?.topic
+    fastify.log.info({ id: socket.id, lang, topic }, 'duel:find')
+    // enqueue and try to match
+    queue.enqueue(socket, lang, topic)
+    const pair = queue.tryDequeuePair(lang, topic)
+    if (pair) {
+      const [a, b] = pair
+      fastify.log.info({ a: a.id, b: b.id, lang, topic }, 'duel:pair')
+      const room = new DuelRoom(a, b, { totalRounds: 10, roundMs: 15000 })
+      room.start()
+    } else {
+      socket.emit('duel:queued')
+    }
   })
 
   socket.on('duel:leave', () => {
     fastify.log.info({ id: socket.id }, 'duel:leave')
+    queue.remove(socket)
     socket.disconnect(true)
   })
 
@@ -59,6 +65,7 @@ io.on('connection', (socket: Socket) => {
 
   socket.on('disconnect', (reason: string) => {
     fastify.log.info({ id: socket.id, reason }, 'socket disconnected')
+    queue.remove(socket)
   })
 })
 
