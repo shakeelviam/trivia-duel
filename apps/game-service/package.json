@@ -7,22 +7,27 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "start": "node dist/server.js",
-    "build": "tsup src/server.ts --format esm,cjs --dts --clean"
+    "build": "tsup src/server.ts --format esm,cjs --dts --clean",
+    "simulate": "tsx scripts/simulate-duel.ts",
+    "verify": "tsx scripts/verify-persistence.ts",
+    "seed": "tsx scripts/seed-questions.ts"
   },
   "dependencies": {
-    "fastify": "^5.0.0",
     "@fastify/cors": "^10.0.1",
     "@fastify/rate-limit": "^10.1.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "dotenv": "^16.4.5",
+    "fastify": "^5.0.0",
     "fastify-plugin": "^4.5.1",
-    "socket.io": "^4.7.5",
-    "zod": "^3.23.8",
     "pino": "^9.0.0",
-    "dotenv": "^16.4.5"
+    "socket.io": "^4.7.5",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/node": "^20.12.12",
+    "socket.io-client": "^4.7.5",
     "tsup": "^8.1.0",
     "tsx": "^4.16.0",
-    "typescript": "^5.5.4",
-    "@types/node": "^20.12.12"
+    "typescript": "^5.5.4"
   }
 }
